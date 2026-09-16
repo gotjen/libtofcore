@@ -5,23 +5,28 @@ Libraries to interface with the PreAct TOF sensors.
 ## Environment Setup
 Requirements:
 
-- CMake v3.16
-- Requires Boost v1.70 or newer
-- Python v3.8 or greater (if using python bindings)
-- Python setuptools
-- libudev-dev (prequisite for libusbp)
-- libusbp v1.3 or newer
+| Dependency | Minimum | Tested with |
+|---|---|---|
+| CMake | 3.16 | 4.2.3 |
+| C++ compiler | C++17 support | GCC 15.2 |
+| Boost (headers + `program_options`) | 1.70 | 1.90.0 |
+| Python + development headers (if building Python bindings) | 3.8 | 3.14 |
+| libudev-dev (prerequisite for libusbp) | | |
+| libusbp | 1.3 (bundled in `tofcore/third_party` if not installed) | bundled |
+| git + network access | | |
 
-Python setuptools installation
-(might need Python venv setup)
-```
-sudo pip install setuptools
-```
+pybind11 (v3.0.1) and GoogleTest are downloaded automatically by CMake at configure time.
 
-Libudev installation
+Debian/Ubuntu package installation
 ```
 sudo apt-get update -y
-sudo apt-get install cmake libudev-dev pkg-config g++
+sudo apt-get install cmake g++ git pkg-config libudev-dev \
+    libboost-dev libboost-program-options-dev python3-dev
+```
+
+Python setuptools installation (only needed for `make pytofcore`, might need Python venv setup)
+```
+pip install setuptools
 ```
 
 USB Udev Rules
@@ -36,7 +41,24 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="35FA", ATTRS{idProduct}=="0D0F", MODE:="066
 ### Build
 ```
 cmake -B build
-cmake --build build
+cmake --build build -j$(nproc)
+```
+(or `make build`)
+
+Useful configure options:
+
+- `-DBUILD_PYTHON_BINDINGS=OFF` skips the Python module (on by default).
+- `-DPython_EXECUTABLE=/usr/bin/python3` selects which Python the bindings are built for. Use it when several are installed, for example with pyenv.
+
+Build outputs:
+
+- `build/tofcore/libtofcore.a`
+- the command line tools under `build/tofcore/test/functional-tests/`, for example `tof-stat`
+- `build/tofcore/wrappers/python/pytofcore.cpython-*.so`
+
+To try the Python module without installing it:
+```
+PYTHONPATH=build/tofcore/wrappers/python python3 -c "import pytofcore"
 ```
 
 ### Install to local system
@@ -55,7 +77,14 @@ make pytofcore
 
 ## Testing
 
-### Unit Tests
+### C++ Unit Tests
+No camera required:
+```
+ctest --test-dir build/tofcore --output-on-failure
+```
+(or `make cpp_unit_test`)
+
+### Python Unit Tests
 To run unit tests verifying behavior when no camera is connected, use the following commnad from
 
 project's root directory: 

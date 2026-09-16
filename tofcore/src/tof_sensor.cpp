@@ -98,7 +98,7 @@ public:
         }
     }
 
-    boost::asio::io_service ioService;
+    boost::asio::io_context ioService;
     std::thread serverThread_;
     std::mutex measurementReadyMutex;
     on_measurement_ready_t measurementReady;

@@ -34,7 +34,7 @@ namespace tofcore
 
     constexpr uint32_t ANSWER_START_PATTERN = 0xFFFFAA55;   ///< Pattern marking the start of an answer
 
-TcpConnection::TcpConnection(boost::asio::io_service &ioService,
+TcpConnection::TcpConnection(boost::asio::io_context &ioService,
                              const uri &uri,
                              log_callback_t log_callback,
                              cmd_descr_callback_t cmd_descr_callback) :
@@ -235,15 +235,13 @@ TcpConnection::TcpConnection(boost::asio::io_service &ioService,
             return;
         }
 
-        tcp::resolver::query query(host, std::to_string(port));
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-        tcp::resolver::iterator end;
+        const auto endpoints = resolver.resolve(host, std::to_string(port));
 
         boost::system::error_code error = boost::asio::error::host_not_found;
-        while (error && endpoint_iterator != end)
+        for (auto it = endpoints.begin(); error && it != endpoints.end(); ++it)
         {
             socket.close();
-            socket.connect(*endpoint_iterator++, error);
+            socket.connect(*it, error);
         }
         if (error)
         {
