@@ -70,3 +70,4 @@ _deps
 # vcpkg
 vcpkg_installed/
 
+/.python-version
