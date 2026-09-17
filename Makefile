@@ -14,8 +14,7 @@ PHONY: pytofcore
 pytofcore: ## install pytofcore (need to run make build first)
 	python3 -m pip uninstall -y pytofcore
 	cp build/tofcore/wrappers/python/*.so tofcore/wrappers/python/pytofcore
-	cd tofcore/wrappers/python && python3 setup.py install --user
-	ln -sf ./build/tofcore/wrappers/python/pytofcore.cpython*.so  
+	cd tofcore/wrappers/python && python3 -m pip install .
 
 
 PHONY: functional_tests
